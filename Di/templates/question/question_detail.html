@@ -1,0 +1,158 @@
+<title>Legends of AI</title>
+<link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}"/>
+<script src="{{ url_for('static', filename='jquery-3.6.0.js') }}"></script>
+<style>
+            @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+html {
+  height:100%;
+  background-image: linear-gradient(to right top, #8e44ad 0%, #3498db 100%);
+}
+
+nav {
+  max-width: 960px;
+  mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #ffffff 25%, #ffffff 75%, rgba(255, 255, 255, 0) 100%);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+nav ul {
+  text-align: center;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.2) 75%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1), inset 0 0 0px rgba(255, 255, 255, 0.6);
+}
+
+nav ul li {
+  display: inline-block;
+}
+
+nav ul li a {
+  padding: 18px;
+  font-family: "Open Sans";
+  text-transform:uppercase;
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  text-decoration: none;
+  display: block;
+}
+
+nav ul li a:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+</style>
+<body class="bg-secondary">
+<div style="text-align : center;"><a href="{{ url_for('main.mainpage') }}"><img src="{{ url_for('static', filename='images/logo.png') }}"/></a></div>
+    <nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('main.mainpage') }}">Home</a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.altar') }}">Altar</a>
+            </li>
+            <li>
+                <a href="{{ url_for('question._list') }}">Library</a>
+            </li>
+            {% if g.user %}
+                <li>
+                    <a href="{{ url_for('auth.signout') }}">Sign out</a>
+                </li>
+                <li>
+                    <div style="color: #232323">Hi, {{ g.user.username }}</div>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ url_for('auth.signin') }}">Sign in</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                </li>
+          {% endif %}
+        </ul>
+    </nav>
+<div style="text-align : center;"><a href="{{ url_for('question._list') }}"><img src="{{ url_for('static', filename='images/library_logo.jpg') }}" width="1000" height="485"/></a></div>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <h2 class="border-bottom py-2 text-white">{{ question.subject }}</h2>
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div>
+            <div class="d-flex justify-content-end">
+                {% if question.modify_date %}
+                <div class="badge badge-light p-2 text-left mx-3">
+                    <div class="mb-2">Last modified at</div>
+                    <div>{{ question.modify_date|datetime }}</div>
+                </div>
+                {% endif %}
+                <div class="badge badge-light p-2 text-left">
+                    <div class="mb-2">written by {{ question.user.username }} at</div>
+                    <div>{{ question.create_date|datetime }}</div>
+                </div>
+            </div>
+            {% if g.user == question.user %}
+                <div class="my-3">
+                    <a href="{{ url_for('question.modify', question_id=question.id) }}"
+                        class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <a href="#" class="delete btn btn-sm btn-outline-secondary"
+                        data-uri="{{ url_for('question.delete', question_id=question.id) }}">Delete</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <h5 class="border-bottom my-3 py-2 text-white">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
+    {% for answer in question.answer_set %}
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div>
+            <div class="d-flex justify-content-end">
+                {% if answer.modify_date %}
+                <div class="badge badge-light p-2 text-left mx-3">
+                    <div class="mb-2">Last modified at</div>
+                    <div>{{ answer.modify_date|datetime }}</div>
+                </div>
+                {% endif %}
+                <div class="badge badge-light p-2 text-left">
+                    <div class="mb-2">written by {{ answer.user.username }} at</div>
+                    <div>{{ answer.create_date|datetime }}</div>
+                </div>
+            </div>
+            {% if g.user == answer.user %}
+                <div class="my-3">
+                    <a href="{{ url_for('answer.modify', answer_id=answer.id) }}"
+                        class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <a href="#" class="delete btn btn-sm btn-outline-secondary "
+                data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}">Delete</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    <form action="{{ url_for('answer.create', question_id=question.id) }}" method="post" class="my-3">
+        {{ form.csrf_token }}
+        {% for field, errors in form.errors.items() %}
+        <div class="alert alert-danger" role="alert">
+            <strong>{{ form[field].label }}</strong>: {{ ', '.join(errors) }}
+        </div>
+        {% endfor %}
+        <div class="form-group">
+            <textarea {% if not g.user %}disabled{% endif %}
+                    name="content" id="content" class="form-control" rows="10"></textarea>
+        </div>
+        <input type="submit" value="답변등록" class="btn btn-primary">
+    </form>
+</div>
+<script type='text/javascript'>
+$(document).ready(function(){
+    $(".delete").on('click', function() {
+        if(confirm("You want delete this?")) {
+            location.href = $(this).data('uri');
+        }
+    });
+});
+</script>
+{% endblock %}
+</body>

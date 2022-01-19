@@ -1,0 +1,225 @@
+<head>
+    <title>Legends of AI</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}"/>
+    <script src="{{ url_for('static', filename='jquery-3.6.0.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <style>
+            @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+
+nav {
+  max-width: 960px;
+  mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #ffffff 25%, #ffffff 75%, rgba(255, 255, 255, 0) 100%);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+nav ul {
+  text-align: center;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.2) 75%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1), inset 0 0 0px rgba(255, 255, 255, 0.6);
+}
+
+nav ul li {
+  display: inline-block;
+}
+
+nav ul li a {
+  padding: 18px;
+  font-family: "Open Sans";
+  text-transform:uppercase;
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  text-decoration: none;
+  display: block;
+}
+
+nav ul li a:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+}
+#slider {
+  position: relative;
+  overflow: hidden;
+  margin: 20px auto 0 auto;
+  border-radius: 5px;
+}
+
+#slider ul {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  height: 720px;
+  list-style: none;
+}
+
+#slider ul li {
+  position: relative;
+  display: block;
+  float: left;
+  margin: 0;
+  padding: 0;
+  width: 1280px;
+  height: 720px;
+  background: #ccc;
+  text-align: center;
+  line-height: 720px;
+}
+
+button.control_prev, button.control_next {
+  position: absolute;
+  top: 40%;
+  z-index: 999;
+  display: block;
+  padding: 2% 1%;
+  width: auto;
+  height: auto;
+  background: #2a2a2a;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 18px;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+button.control_prev:hover, button.control_next:hover {
+  opacity: 1;
+  -webkit-transition: all 0.2s ease;
+}
+
+button.control_prev {
+  border-radius: 0 2px 2px 0;
+}
+
+button.control_next {
+  right: 0;
+  border-radius: 2px 0 0 2px;
+}
+
+.slider_option {
+  position: relative;
+  margin: 10px auto;
+  width: 160px;
+  font-size: 18px;
+}
+
+
+
+.filebox label { display: inline-block; padding: .5em .75em; color: #fff; font-size: inherit; line-height: normal; vertical-align: middle; background-color: #252525; cursor: pointer; border: 1px solid #ebebeb; border-bottom-color: #e2e2e2; border-radius: .25em; }
+.filebox input[type="file"] { /* 파일 필드 숨기기 */ position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip:rect(0,0,0,0); border: 0; }
+input { display: inline-block; padding: .5em .75em; color: #999; font-size: inherit; line-height: normal; vertical-align: middle; background-color: #fdfdfd; cursor: pointer; border: 1px solid #ebebeb; border-bottom-color: #e2e2e2; border-radius: .25em; }
+
+    </style>
+</head>
+<body style="background: #050505; text-align: center;">
+<div><a href="{{ url_for('main.mainpage') }}"><img src="{{ url_for('static', filename='images/logo.png') }}"/></a></div>
+    <nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('main.mainpage') }}">Home</a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.altar') }}">Altar</a>
+            </li>
+            <li>
+                <a href="{{ url_for('question._list') }}">Library</a>
+            </li>
+            {% if g.user %}
+                <li>
+                    <a href="{{ url_for('auth.signout') }}">Sign out</a>
+                </li>
+                <li>
+                    <div style="color: #232323">Hi, {{ g.user.username }}</div>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ url_for('auth.signin') }}">Sign in</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                </li>
+          {% endif %}
+        </ul>
+    </nav>
+<div><a href="{{ url_for('main.altar') }}"><img src="{{ url_for('static', filename='images/altar_logo.jpg') }}" width="40%"/></a></div>
+<div class="slider_option" style="color: white">
+  <div><label>Autoplay</label></div>
+  <button id="autoplay" class="btn btn-primary">Start</button>
+  <button id="autoplay_stop" class="btn btn-primary">Stop</button>
+</div>
+<div id="slider">
+  <button class="control_next">>></button>
+  <button class="control_prev"><<</button>
+    <ul>
+    {% for i in range(count) %}
+        <li><img src="{{ filenames[i] }}" width="1280px"/></li>
+    {% endfor %}
+    </ul>
+</div>
+<div style="margin-bottom: 20px"></div>
+<div class="filebox">
+    <div style="background: #050505; text-align: center;" class="form-group">
+    <a href="{{ url_for('main.altar') }}" class="btn btn-primary" role="button" data-bs-toggle="button">Return to The Altar</a>
+</div>
+</div>
+<div style="margin-bottom: 50px"></div>
+</body>
+<script type="text/javascript">
+jQuery(document).ready(function ($) {
+
+    document.getElementById("autoplay").addEventListener("click", autoplay);
+    document.getElementById("autoplay_stop").addEventListener("click", autoplay_stop);
+
+    var auto;
+
+      function autoplay() {
+        auto = setInterval(function () {
+            moveRight();
+        }, 3000);}
+
+      function autoplay_stop() {
+        clearInterval(auto);}
+
+	var slideCount = $('#slider ul li').length;
+	var slideWidth = $('#slider ul li').width();
+	var slideHeight = $('#slider ul li').height();
+	var sliderUlWidth = slideCount * slideWidth;
+
+	$('#slider').css({ width: slideWidth, height: slideHeight });
+
+	$('#slider ul').css({ width: sliderUlWidth, marginLeft: - slideWidth });
+
+    $('#slider ul li:last-child').prependTo('#slider ul');
+
+    function moveLeft() {
+        $('#slider ul').animate({
+            left: + slideWidth
+        }, 200, function () {
+            $('#slider ul li:last-child').prependTo('#slider ul');
+            $('#slider ul').css('left', '');
+        });
+    };
+
+    function moveRight() {
+        $('#slider ul').animate({
+            left: - slideWidth
+        }, 200, function () {
+            $('#slider ul li:first-child').appendTo('#slider ul');
+            $('#slider ul').css('left', '');
+        });
+    };
+
+    $('button.control_prev').click(function () {
+        moveLeft();
+    });
+
+    $('button.control_next').click(function () {
+        moveRight();
+    });
+
+});
+
+</script>

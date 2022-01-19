@@ -1,0 +1,195 @@
+<head>
+    <title>Legends of AI</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}"/>
+    <script src="https://unpkg.com/mediainfo.js@0.1.4/dist/mediainfo.min.js"></script>
+    <style>
+            @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+nav {
+  max-width: 960px;
+  mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #ffffff 25%, #ffffff 75%, rgba(255, 255, 255, 0) 100%);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+nav ul {
+  text-align: center;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.2) 75%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1), inset 0 0 0px rgba(255, 255, 255, 0.6);
+}
+
+nav ul li {
+  display: inline-block;
+}
+
+nav ul li a {
+  padding: 18px;
+  font-family: "Open Sans";
+  text-transform:uppercase;
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  text-decoration: none;
+  display: block;
+}
+
+nav ul li a:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+}
+#output {
+  height: 50%;
+  width: 80%;
+}
+
+
+.filebox label { display: inline-block; padding: .5em .75em; color: #fff; font-size: inherit; line-height: normal; vertical-align: middle; background-color: #252525; cursor: pointer; border: 1px solid #ebebeb; border-bottom-color: #e2e2e2; border-radius: .25em; }
+.filebox input[type="file"] { /* 파일 필드 숨기기 */ position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip:rect(0,0,0,0); border: 0; }
+input { display: inline-block; padding: .5em .75em; color: #999; font-size: inherit; line-height: normal; vertical-align: middle; background-color: #fdfdfd; cursor: pointer; border: 1px solid #ebebeb; border-bottom-color: #e2e2e2; border-radius: .25em; }
+    </style>
+    <script src="{{ url_for('static', filename='jquery-3.6.0.js') }}"></script>
+</head>
+<body style="background: #050505">
+<div style="text-align : center"><a href="{{ url_for('main.mainpage') }}"><img src="{{ url_for('static', filename='images/logo.png') }}"/></a></div>
+    <nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('main.mainpage') }}">Home</a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.altar') }}">Altar</a>
+            </li>
+            <li>
+                <a href="{{ url_for('question._list') }}">Library</a>
+            </li>
+            {% if g.user %}
+                <li>
+                    <a href="{{ url_for('auth.signout') }}">Sign out</a>
+                </li>
+                <li>
+                    <div style="color: #232323">Hi, {{ g.user.username }}</div>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ url_for('auth.signin') }}">Sign in</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                </li>
+          {% endif %}
+        </ul>
+    </nav>
+<div style="text-align: center"><a href="{{ url_for('main.altar') }}"><img src="{{ url_for('static', filename='images/altar_logo.jpg') }}"/></a></div>
+<div class="filebox">
+    <div style="text-align: center"><video controls width="1280"></video></div>
+    <div style="margin-left: 40%">
+    <div><span style="color:#FFFFFF">File Name: </span><span id="name" style="color:#FFFFFF"></span></div>
+    <div><span style="color:#FFFFFF">File Size: </span><span id="size" style="color:#FFFFFF"></span><span id= "byte" style="color:#FFFFFF"></span></div>
+    <div><span style="color:#FFFFFF">Width: </span><span id="width" style="color:#FFFFFF"></span><span id= "pxw" style="color:#FFFFFF"></span></div>
+    <div><span style="color:#FFFFFF">Height: </span><span id="height" style="color:#FFFFFF"></span><span id= "pxh" style="color:#FFFFFF"></span></div>
+    <div><span style="color:#FFFFFF">Duration: </span><span id="duration" style="color:#FFFFFF"></span><span id= "sec" style="color:#FFFFFF"></span></div>
+    </div>
+    <div style="background: #050505; text-align: center;" class="form-group">
+        <form action = "http://192.168.25.44:5000/fileupload_v" method = "POST" enctype = "multipart/form-data" style="margin-bottom: 15px">
+            <label for="fileinput"> Set Sacrifices </label>
+            <input type = "file" name="file" id="fileinput" style="background: #050505; color: white">
+            <input type = "submit" style="background: #252525; color: white" id="input" value="and Pray"/>
+        </form>
+    </div>
+    <div style="text-align: center"><textarea id="output"></textarea></div>
+</div>
+</body>
+<script type="text/javascript">
+
+(function localFileVideoPlayer()
+{
+      'use strict'
+      var playSelectedFile = function(event)
+           {
+               var file = this.files[0]
+               var URL = window.URL || window.webkitURL
+               var fileURL = URL.createObjectURL(file)
+               var videoNode = document.querySelector('video')
+               videoNode.src = fileURL
+               var video = document.querySelector('video')
+               video.setAttribute('src', window.URL.createObjectURL(file))
+               video.onloadeddata = function(event)
+               {
+                   const
+                   {
+                       videoHeight,
+                       videoWidth,
+                       duration,
+                   } = event.srcElement
+                   $("#width").text(videoWidth)
+                   $("#height").text(videoHeight)
+                   $("#duration").text(duration)
+               }
+               $("#name").text(file.name)
+               $("#pxw").text("px")
+               $("#pxh").text("px")
+               $("#sec").text("sec")
+               var size = file.size
+               var byte = ""
+               if(1024 > size){
+                   byte = "Byte";
+                   console.log(size);
+               }else if(1048576 > size){
+                   size = file.size / 1024;
+                   size = size.toFixed(3);
+                   byte = "KB";
+               }else if(1073741824 > size){
+                   size = file.size / 1048576;
+                   size = size.toFixed(2);
+                   byte = "MB";
+               }else if(size >= 1073741824){
+                   size = file.size / 1073741824;
+                   size = size.toFixed(2);
+                   byte = "GB";
+               }else{
+                   size = file.size; }
+               $("#size").text(size)
+               $("#byte").text(byte)
+
+           }
+      var inputNode = document.querySelector('input')
+      inputNode.addEventListener('change', playSelectedFile, false)
+})();
+const fileinput = document.getElementById("fileinput");
+const output = document.getElementById("output");
+
+const onChangeFile = (mediainfo) => {
+  const file = fileinput.files[0];
+  if (file) {
+    output.value = "Working…";
+
+    const getSize = () => file.size;
+
+    const readChunk = (chunkSize, offset) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target.error) {
+            reject(event.target.error);
+          }
+          resolve(new Uint8Array(event.target.result));
+        };
+        reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
+      });
+
+    mediainfo
+      .analyzeData(getSize, readChunk)
+      .then((result) => {
+        output.value = result;
+      })
+      .catch((error) => {
+        output.value = `An error occured:\n${error.stack}`;
+      });
+  }
+};
+
+MediaInfo({ format: "text" }, (mediainfo) => {
+fileinput.addEventListener("change", () => onChangeFile(mediainfo));
+});
+
+</script>

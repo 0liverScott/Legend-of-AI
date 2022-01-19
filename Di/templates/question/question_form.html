@@ -1,0 +1,95 @@
+<title>Legends of AI</title>
+<link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}"/>
+{% extends 'base.html' %}
+{% block content %}
+<style>
+            @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+nav {
+  max-width: 960px;
+  mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #ffffff 25%, #ffffff 75%, rgba(255, 255, 255, 0) 100%);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+nav ul {
+  text-align: center;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.2) 75%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1), inset 0 0 0px rgba(255, 255, 255, 0.6);
+}
+
+nav ul li {
+  display: inline-block;
+}
+
+nav ul li a {
+  padding: 18px;
+  font-family: "Open Sans";
+  text-transform:uppercase;
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  text-decoration: none;
+  display: block;
+}
+
+nav ul li a:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+
+</style>
+<body style="background: #050505">
+<div style="text-align: center"><a href="{{ url_for('main.mainpage') }}"><img src="{{ url_for('static', filename='images/logo.png') }}"/></a></div>
+    <nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('main.mainpage') }}">Home</a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.altar') }}">Altar</a>
+            </li>
+            <li>
+                <a href="{{ url_for('question._list') }}">Library</a>
+            </li>
+            {% if g.user %}
+                <li>
+                    <a href="{{ url_for('auth.signout') }}">Sign out</a>
+                </li>
+                <li>
+                    <div style="color: #232323">Hi, {{ g.user.username }}</div>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ url_for('auth.signin') }}">Sign in</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                </li>
+          {% endif %}
+        </ul>
+    </nav>
+<div style="text-align : center;"><a href="{{ url_for('question._list') }}"><img src="{{ url_for('static', filename='images/library_logo.jpg') }}" width="1000" height="485"/></a></div>
+<div class="container" style="color: white">
+    <h5 class="my-3 border-bottom pb-2">Post you think about</h5>
+    <form method="post" class="post-form my-3">
+        {{ form.csrf_token }}
+        {% for field, errors in form.errors.items() %}
+        <div class="alert alert-danger" role="alert">
+            <strong>{{ form[field].label }}</strong>: {{ ', '.join(errors) }}
+        </div>
+        {% endfor %}
+    <div class="form-group">
+                <label for="subject">Title</label>
+                <input type="text" class="form-control" name="subject" id="subject" value="{{ form.subject.data or '' }}">
+            </div>
+            <div class="form-group">
+                <label for="content">Description</label>
+                <textarea class="form-control" name="content" id="content" rows="8">{{ form.content.data or '' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Post</button>
+    </form>
+</div>
+</body>
+{% endblock %}

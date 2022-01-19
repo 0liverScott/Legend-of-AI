@@ -1,0 +1,156 @@
+<head>
+    <title>Legends of AI</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}"/>
+    <style>
+                @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+html {
+  height:100%;
+  background-image: linear-gradient(to right top, #8e44ad 0%, #3498db 100%);
+}
+
+nav {
+  max-width: 960px;
+  mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #ffffff 25%, #ffffff 75%, rgba(255, 255, 255, 0) 100%);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+nav ul {
+  text-align: center;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.2) 75%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1), inset 0 0 0px rgba(255, 255, 255, 0.6);
+}
+
+nav ul li {
+  display: inline-block;
+}
+
+nav ul li a {
+  padding: 18px;
+  font-family: "Open Sans";
+  text-transform:uppercase;
+  color: rgba(0, 0, 0, 1);
+  font-size: 18px;
+  text-decoration: none;
+  display: block;
+}
+
+nav ul li a:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+
+    </style>
+</head>
+<body class="bg-secondary">
+<div style="text-align : center;"><a href="{{ url_for('main.mainpage') }}"><img src="{{ url_for('static', filename='images/logo.png') }}"/></a></div>
+<nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('main.mainpage') }}">Home</a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.altar') }}">Altar</a>
+            </li>
+            <li>
+                <a href="{{ url_for('question._list') }}">Library</a>
+            </li>
+            {% if g.user %}
+                <li>
+                    <a href="{{ url_for('auth.signout') }}">Sign out</a>
+                </li>
+                <li>
+                    <div style="color: #232323">Hi, {{ g.user.username }}</div>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ url_for('auth.signin') }}">Sign in</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                </li>
+          {% endif %}
+        </ul>
+</nav>
+<div style="text-align : center;"><a href="{{ url_for('question._list') }}"><img src="{{ url_for('static', filename='images/library_logo.jpg') }}" width="1000" height="485"/></a></div>
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3" id="list">
+    <table class="table">
+        <thead>
+        <tr class="thread-dark">
+            <th class="text-white">No.</th>
+            <th class="text-white">Title</th>
+            <th class="text-white">Writer</th>
+            <th class="text-white">Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if question_list %}
+        {% for question in question_list.items %}
+        <tr>
+            <td class="text-white">{{ question.id }}</td>
+            <td>
+                <a class="text-white" href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
+                {% if question.answer_set|length > 0 %}
+                <span class="text-danger small ml-2">{{ question.answer_set|length }}</span>
+                {% endif %}
+            </td>
+            <td class="text-white">{{ question.user.username }}</td>
+            <td class="text-white">{{ question.create_date|datetime }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="3">질문이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('question.write') }}" class="btn btn-primary">Post</a>
+    <ul class="pagination justify-content-center">
+        <!-- prev page -->
+        {% if question_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ question_list.prev_num }}">이전</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true" href="#">이전</a>
+        </li>
+        {% endif %}
+        {% for page_num in question_list.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != question_list.page %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active" aria-current="page">
+                    <a class="page-link" href="#">{{ page_num }}</a>
+                </li>
+                {% endif %}
+           {% else %}
+                <li class="disabled">
+                    <a class="page-link" href="#">...</a>
+                </li>
+           {% endif %}
+        {% endfor %}
+            <!-- next page -->
+            {% if question_list.has_next %}
+        <li class="page-item">
+            <a class="page-link btn btn-success" href="?page={{ question_list.next_num }}">다음</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link btn btn-success" tabindex="-1" aria-disabled="true" href="#">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+{% endblock %}
+</body>
